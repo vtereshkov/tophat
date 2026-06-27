@@ -689,6 +689,24 @@ umth_input_get_mouse_scroll(UmkaStackSlot *p, UmkaStackSlot *r)
 	*(th_vf2 *)umkaGetResult(p, r)->ptrVal = out;
 }
 
+// fn umth_input_get_touches(): []Touch
+void
+umth_input_get_touches(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	UmkaDynArray(th_touch) *result = umkaGetResult(p, r)->ptrVal;
+	umkaMakeDynArray(thg->umka, result, umkaGetResultType(p, r), thg->touch_count);
+
+	for (int i = 0; i < thg->touch_count; i++) {
+		th_touch touch = thg->touches[i];
+		touch.pos.x = (touch.pos.x - thg->offset.x) / thg->scaling;
+		touch.pos.y = (touch.pos.y - thg->offset.y) / thg->scaling;
+		touch.delta.x /= thg->scaling;
+		touch.delta.y /= thg->scaling;
+
+		result->data[i] = touch;
+	}
+}
+
 // fn umth_input_gamepad_get_gamepads*(): [4]int
 void
 umth_input_gamepad_get_gamepads(UmkaStackSlot *p, UmkaStackSlot *r)
@@ -1554,6 +1572,7 @@ _th_umka_bind(void *umka)
 	umkaAddFunc(umka, "umth_input_get_str", &umth_input_get_str);
 	umkaAddFunc(umka, "umth_input_get_mouse_delta", &umth_input_get_mouse_delta);
 	umkaAddFunc(umka, "umth_input_get_mouse_scroll", &umth_input_get_mouse_scroll);
+	umkaAddFunc(umka, "umth_input_get_touches", &umth_input_get_touches);
 	umkaAddFunc(umka, "umth_input_gamepad_get_gamepads", &umth_input_gamepad_get_gamepads);
 	umkaAddFunc(umka, "umth_input_gamepad_get_gamepad", &umth_input_gamepad_get_gamepad);
 	umkaAddFunc(umka, "umth_input_gamepad_is_pressed", &umth_input_gamepad_is_pressed);

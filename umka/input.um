@@ -176,6 +176,29 @@ type Gamepad* = struct {
 	id: int
 }
 
+//~~enum TouchPhase
+// The lifecycle phase a `Touch` is in during the current frame.
+type TouchPhase* = enum {
+	began       // the touch started this frame
+	moved       // the touch moved this frame
+	stationary  // the touch is held without moving
+	ended       // the touch was lifted this frame
+	cancelled   // the touch was cancelled by the system this frame
+}
+//~~
+
+//~~struct Touch
+// A single touch point. `id` is stable across frames for the same finger,
+// `pos` is in screen space (like `getMousePos`), `delta` is the movement
+// since the last frame and `phase` describes its lifecycle this frame.
+type Touch* = struct {
+	id: uint
+	pos: th::Vf2
+	delta: th::Vf2
+	phase: TouchPhase
+}
+//~~
+
 fn toupper(c: char): int {
 	if c >= 'a' && c <= 'z' {
 		return int(c) - 32;
@@ -297,6 +320,45 @@ fn umth_input_get_mouse_scroll(): th::Vf2
 fn getMouseScroll*(): th::Vf2 {
 //~~
 	return umth_input_get_mouse_scroll()
+}
+
+fn umth_input_get_touches(): []Touch
+//~~fn touches
+// Returns all touches that are currently active on the touchscreen.
+fn touches*(): []Touch {
+//~~
+	return umth_input_get_touches()
+}
+
+//~~fn isTouched
+// Returns true while at least one finger is held on the screen.
+fn isTouched*(): bool {
+//~~
+	return len(touches()) > 0
+}
+
+//~~fn isJustTouched
+// Returns true if a finger touched the screen this frame.
+fn isJustTouched*(): bool {
+//~~
+	for _, t in touches() {
+		if t.phase == .began {
+			return true
+		}
+	}
+	return false
+}
+
+//~~fn isJustUntouched
+// Returns true if a finger was lifted off the screen this frame.
+fn isJustUntouched*(): bool {
+//~~
+	for _, t in touches() {
+		if t.phase == .ended {
+			return true
+		}
+	}
+	return false
 }
 
 fn umth_input_gamepad_get_gamepads*(): [4]int

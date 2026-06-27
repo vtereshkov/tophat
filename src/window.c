@@ -121,18 +121,7 @@ event(const sapp_event *ev)
 	case SAPP_EVENTTYPE_TOUCHES_MOVED:
 	case SAPP_EVENTTYPE_TOUCHES_ENDED:
 	case SAPP_EVENTTYPE_TOUCHES_CANCELLED:
-		if (ev->num_touches > 0 && ev->touches[0].changed) {
-			if (ev->type == SAPP_EVENTTYPE_TOUCHES_MOVED) {
-				thg->mouse_delta.x += ev->touches[0].pos_x - thg->mouse.x;
-				thg->mouse_delta.y += ev->touches[0].pos_y - thg->mouse.y;
-			}
-			thg->mouse = (th_vf2){.x = ev->touches[0].pos_x, .y = ev->touches[0].pos_y};
-
-			if (ev->type == SAPP_EVENTTYPE_TOUCHES_BEGAN)
-				th_input_key(1, true);
-			else if (ev->type == SAPP_EVENTTYPE_TOUCHES_ENDED || ev->type == SAPP_EVENTTYPE_TOUCHES_CANCELLED)
-				th_input_key(1, false);
-		}
+		th_input_touches(ev);
 		break;
 #endif
     default:
