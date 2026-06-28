@@ -188,16 +188,20 @@ type TouchPhase* = enum {
 //~~
 
 //~~struct Touch
-// A single touch point. `id` is stable across frames for the same finger,
-// `pos` is in screen space (like `getMousePos`), `delta` is the movement
-// since the last frame and `phase` describes its lifecycle this frame.
+// A single touch point. `pos` is in screen space (like `getMousePos`), `delta`
+// is the movement since the last frame and `phase` describes its lifecycle this
+// frame. The stable per-finger id is the key in the map returned by `getTouches`.
 type Touch* = struct {
-	id: uint
 	pos: th::Vf2
 	delta: th::Vf2
 	phase: TouchPhase
 }
 //~~
+
+type TouchWithId = struct {
+	id: uint
+	touch: Touch
+}
 
 fn toupper(c: char): int {
 	if c >= 'a' && c <= 'z' {
@@ -322,48 +326,45 @@ fn getMouseScroll*(): th::Vf2 {
 	return umth_input_get_mouse_scroll()
 }
 
-fn umth_input_get_touches(): []Touch
-//~~fn touches
-// Returns all touches that are currently active on the touchscreen.
-fn touches*(): []Touch {
+fn umth_input_get_touches(): []TouchWithId
+//~~fn getTouches
+// Returns all touches that are currently active on the touchscreen, keyed by
+// their stable per-finger id.
+fn getTouches*(): map[uint]Touch {
 //~~
-	return umth_input_get_touches()
+	result := map[uint]Touch{}
+	for _, t in umth_input_get_touches() {
+		result[t.id] = t.touch
+	}
+	return result
 }
 
 //~~fn isTouched
 // Returns true while the finger with the given `id` is held on the screen.
 fn isTouched*(id: uint): bool {
 //~~
-	for _, t in touches() {
-		if t.id == id && t.phase != .ended && t.phase != .cancelled {
-			return true
-		}
+	touches := getTouches()
+	if !validkey(touches, id) {
+		return false
 	}
-	return false
+	phase := touches[id].phase
+	return phase != .ended && phase != .cancelled
 }
 
 //~~fn isJustTouched
 // Returns true if the finger with the given `id` touched the screen this frame.
 fn isJustTouched*(id: uint): bool {
 //~~
-	for _, t in touches() {
-		if t.id == id && t.phase == .began {
-			return true
-		}
-	}
-	return false
+	touches := getTouches()
+	return validkey(touches, id) && touches[id].phase == .began
 }
 
 //~~fn isJustUntouched
 // Returns true if the finger with the given `id` was lifted off the screen this frame.
 fn isJustUntouched*(id: uint): bool {
 //~~
-	for _, t in touches() {
-		if t.id == id && t.phase == .ended {
-			return true
-		}
-	}
-	return false
+	touches := getTouches()
+	return validkey(touches, id) && touches[id].phase == .ended
 }
 
 fn umth_input_gamepad_get_gamepads*(): [4]int

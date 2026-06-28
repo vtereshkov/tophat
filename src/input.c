@@ -85,13 +85,13 @@ th_input_cycle()
 
 	int kept_count = 0;
 	for (int i = 0; i < thg->touch_count; i++) {
-		th_touch *touch = &thg->touches[i];
+		th_touch_with_id *touch = &thg->touches[i];
 
-		if (touch->phase == th_touch_phase_ended || touch->phase == th_touch_phase_cancelled)
+		if (touch->touch.phase == th_touch_phase_ended || touch->touch.phase == th_touch_phase_cancelled)
 			continue;
 
-		touch->phase = th_touch_phase_stationary;
-		touch->delta = (th_vf2){{0}};
+		touch->touch.phase = th_touch_phase_stationary;
+		touch->touch.delta = (th_vf2){{0}};
 		thg->touches[kept_count++] = *touch;
 	}
 	thg->touch_count = kept_count;
@@ -103,7 +103,7 @@ th_input_touches(const sapp_event *ev)
 	for (int i = 0; i < ev->num_touches; i++) {
 		const sapp_touchpoint *raw_touch = &ev->touches[i];
 
-		th_touch *touch = NULL;
+		th_touch_with_id *touch = NULL;
 		for (int j = 0; j < thg->touch_count; j++) {
 			if (thg->touches[j].id == raw_touch->identifier) {
 				touch = &thg->touches[j];
@@ -115,11 +115,13 @@ th_input_touches(const sapp_event *ev)
 			if (ev->type == SAPP_EVENTTYPE_TOUCHES_CANCELLED || ev->type == SAPP_EVENTTYPE_TOUCHES_ENDED || thg->touch_count >= TH_MAX_TOUCHES)
 				continue;
 
-			thg->touches[thg->touch_count++] = (th_touch){
+			thg->touches[thg->touch_count++] = (th_touch_with_id){
 			    .id = raw_touch->identifier,
-			    .pos = {.x = raw_touch->pos_x, .y = raw_touch->pos_y},
-			    .delta = {{0}},
-			    .phase = th_touch_phase_began,
+			    .touch = {
+			        .pos = {.x = raw_touch->pos_x, .y = raw_touch->pos_y},
+			        .delta = {{0}},
+			        .phase = th_touch_phase_began,
+			    },
 			};
 			continue;
 		}
@@ -127,16 +129,16 @@ th_input_touches(const sapp_event *ev)
 		if (!raw_touch->changed)
 			continue;
 
-		touch->delta.x += raw_touch->pos_x - touch->pos.x;
-		touch->delta.y += raw_touch->pos_y - touch->pos.y;
-		touch->pos = (th_vf2){.x = raw_touch->pos_x, .y = raw_touch->pos_y};
+		touch->touch.delta.x += raw_touch->pos_x - touch->touch.pos.x;
+		touch->touch.delta.y += raw_touch->pos_y - touch->touch.pos.y;
+		touch->touch.pos = (th_vf2){.x = raw_touch->pos_x, .y = raw_touch->pos_y};
 
 		if (ev->type == SAPP_EVENTTYPE_TOUCHES_CANCELLED)
-			touch->phase = th_touch_phase_cancelled;
+			touch->touch.phase = th_touch_phase_cancelled;
 		else if (ev->type == SAPP_EVENTTYPE_TOUCHES_ENDED)
-			touch->phase = th_touch_phase_ended;
-		else if (touch->phase != th_touch_phase_began)
-			touch->phase = th_touch_phase_moved;
+			touch->touch.phase = th_touch_phase_ended;
+		else if (touch->touch.phase != th_touch_phase_began)
+			touch->touch.phase = th_touch_phase_moved;
 	}
 }
 

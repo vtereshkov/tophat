@@ -689,19 +689,19 @@ umth_input_get_mouse_scroll(UmkaStackSlot *p, UmkaStackSlot *r)
 	*(th_vf2 *)umkaGetResult(p, r)->ptrVal = out;
 }
 
-// fn umth_input_get_touches(): []Touch
+// fn umth_input_get_touches(): []TouchWithId
 void
 umth_input_get_touches(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	UmkaDynArray(th_touch) *result = umkaGetResult(p, r)->ptrVal;
+	UmkaDynArray(th_touch_with_id) *result = umkaGetResult(p, r)->ptrVal;
 	umkaMakeDynArray(thg->umka, result, umkaGetResultType(p, r), thg->touch_count);
 
 	for (int i = 0; i < thg->touch_count; i++) {
-		th_touch touch = thg->touches[i];
-		touch.pos.x = (touch.pos.x - thg->offset.x) / thg->scaling;
-		touch.pos.y = (touch.pos.y - thg->offset.y) / thg->scaling;
-		touch.delta.x /= thg->scaling;
-		touch.delta.y /= thg->scaling;
+		th_touch_with_id touch = thg->touches[i];
+		touch.touch.pos.x = (touch.touch.pos.x - thg->offset.x) / thg->scaling;
+		touch.touch.pos.y = (touch.touch.pos.y - thg->offset.y) / thg->scaling;
+		touch.touch.delta.x /= thg->scaling;
+		touch.touch.delta.y /= thg->scaling;
 
 		result->data[i] = touch;
 	}

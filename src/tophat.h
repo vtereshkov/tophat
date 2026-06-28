@@ -321,11 +321,16 @@ typedef enum
 
 typedef struct
 {
-	uint64_t id;
 	th_vf2 pos;
 	th_vf2 delta;
 	int64_t phase;
 } th_touch;
+
+typedef struct
+{
+	uint64_t id;
+	th_touch touch;
+} th_touch_with_id;
 
 // struct holding all tophat's global variables.
 typedef struct
@@ -349,7 +354,7 @@ typedef struct
 	th_vf2 mouse_delta;
 	th_vf2 mouse_wheel;
 
-	th_touch touches[TH_MAX_TOUCHES];
+	th_touch_with_id touches[TH_MAX_TOUCHES];
 	int touch_count;
 
 	th_generic_gamepad gamepad[4];

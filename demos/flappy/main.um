@@ -198,14 +198,7 @@ fn game() {
 	}
 
 	// jumping means setting the y motion to the jumpForce
-	justTouched := false
-	for _, t in input::touches() {
-		if input::isJustTouched(t.id) {
-			justTouched = true
-		}
-	}
-
-	if input::isJustPressedc(' ') || input::isJustPressed(input::Key.mouse1) || justTouched {
+	if input::isJustPressedc(' ') || input::isJustPressed(input::Key.mouse1) || input::isJustTouched(0) {
 		motion.y = jumpForce
 		jumpSound.play()
 	}
